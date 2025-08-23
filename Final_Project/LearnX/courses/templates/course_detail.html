@@ -1,0 +1,13 @@
+<!-- templates/courses/course_detail.html -->
+<h1>{{ course.title }}</h1>
+
+{% for video in videos %}
+  <div class="video">
+    <h3>{{ video.title }}</h3>
+    <iframe width="560" height="315"
+            src="{{ video.get_embed_url }}"
+            frameborder="0"
+            allowfullscreen>
+    </iframe>
+  </div>
+{% endfor %}

@@ -1,0 +1,20 @@
+{% load socialaccount %}
+
+<h2>Login</h2>
+
+<form method="post">
+  {% csrf_token %}
+  Username: <input type="text" name="username"><br>
+  Password: <input type="password" name="password"><br>
+  <button type="submit">Login</button>
+</form>
+
+<hr>
+
+<!-- Google login -->
+<p>Or login with:</p>
+<a href="{% provider_login_url 'google' method='oauth2' process='login' next='/accounts/dashboard/' %}">
+  <img src="https://developers.google.com/identity/images/btn_google_signin_dark_normal_web.png" alt="Google Login">
+</a>
+
+<p>Don't have an account? <a href="{% url 'accounts:register' %}">Register here</a></p>
