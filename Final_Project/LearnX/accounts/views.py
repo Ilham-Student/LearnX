@@ -1,44 +1,37 @@
-from django.shortcuts import render, redirect
-from django.contrib.auth import login, authenticate, logout
+from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
-from .forms import CustomUserCreationForm, ProfileForm
+from django.contrib.auth.forms import AuthenticationForm
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from .forms import RegisterForm, LoginForm
+from courses.models import CourseEnrollment
 
-def register_view(request):
+def register(request):
     if request.method == 'POST':
-        form = CustomUserCreationForm(request.POST)
+        form = RegisterForm(request.POST)
         if form.is_valid():
             user = form.save()
-            login(request, user)
-            return redirect('accounts:dashboard')
+            messages.success(request, "Account created! You can now log in.")
+            return redirect('accounts:login')
     else:
-        form = CustomUserCreationForm()
+        form = RegisterForm()
     return render(request, 'accounts/register.html', {'form': form})
 
 def login_view(request):
     if request.method == 'POST':
-        username = request.POST['username']
-        password = request.POST['password']
-        user = authenticate(request, username=username, password=password)
-        if user:
-            login(request, user)
-            return redirect('accounts:dashboard')
-    return render(request, 'accounts/login.html')
-
-@login_required
-def dashboard_view(request):
-    return render(request, 'accounts/dashboard.html')
-
-@login_required
-def profile_view(request):
-    if request.method == 'POST':
-        form = ProfileForm(request.POST, instance=request.user)
+        form = LoginForm(request, data=request.POST)
         if form.is_valid():
-            form.save()
+            login(request, form.get_user())
             return redirect('accounts:dashboard')
     else:
-        form = ProfileForm(instance=request.user)
-    return render(request, 'accounts/profile.html', {'form': form})
+        form = LoginForm()
+    return render(request, 'accounts/login.html', {'form': form})
 
 def logout_view(request):
     logout(request)
-    return redirect('accounts:login')
+    return redirect('home')
+
+@login_required
+def dashboard(request):
+    enrollments = CourseEnrollment.objects.filter(user=request.user).select_related('course')
+    return render(request, 'accounts/dashboard.html', {'enrollments': enrollments})
